@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.rawchen</groupId>
-	<artifactId>ShortUrl</artifactId>
+	<artifactId>short-url</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ShortUrl</name>
-	<description>ShortUrl</description>
+	<name>short-url</name>
+	<description>short-url</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>

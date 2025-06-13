@@ -8,12 +8,12 @@
 
 ## 使用
 
-* 确保java8及以上环境，在[releases](https://github.com/rawchen/ShortUrl/releases)页面下载jar运行程序。
+* 确保java8及以上环境，在[releases](https://github.com/rawchen/short-url/releases)页面下载jar运行程序。
 * 通过`java -jar ShortUrl.jar`运行该程序，默认访问地址：[http://localhost:8989](http://localhost:8989)。
 * 需部署MySQL数据库，帐号root密码root，端口3306。新建名为`short_url`的库，导入`short_url.sql`
 * Linux部署使用如下命令：
 ```bash
-nohup java -jar -Xmx200m ShortUrl.jar >> ShortUrl.log  &
+nohup java -jar -Xmx200m short-url.jar >> ShortUrl.log  &
 ```
 
 ## 开发

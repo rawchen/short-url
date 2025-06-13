@@ -2,7 +2,7 @@ server:
   port: 8989
 spring:
   application:
-    name: JavaRun
+    name: short-url
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
