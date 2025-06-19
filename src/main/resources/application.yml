@@ -38,7 +38,7 @@ mybatis:
     map-underscore-to-camel-case: true
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-logging:
-  level:
+#logging:
+#  level:
     #控制台打印mapper接口的sql语句日志
-    com.rawchen.shorturl.mapper: debug
+#    com.rawchen.shorturl.mapper: debug
