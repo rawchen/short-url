@@ -49,6 +49,10 @@ public class WebController {
 	@RateLimit(name = "短链跳转接口", perSecond = 0.5)
 	@RequestMapping("/{code}")
 	public String toLink(HttpServletRequest request, @PathVariable String code, Model model) {
+		// 排除浏览器自动请求的特殊路径
+		if ("favicon.ico".equals(code) || "robots.txt".equals(code)) {
+			return null;
+		}
 		try {
 			ShortUrl shortUrl = mapper.getByCode(code);
 

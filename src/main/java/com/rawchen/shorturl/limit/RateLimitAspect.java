@@ -1,9 +1,5 @@
 package com.rawchen.shorturl.limit;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.RateLimiter;
 import com.rawchen.shorturl.entity.Result;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -18,7 +14,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 限流切面
@@ -33,20 +28,10 @@ public class RateLimitAspect {
 	private static final Logger logger = LoggerFactory.getLogger(RateLimitAspect.class);
 
 	/**
-	 * 缓存
-	 * maximumSize 设置缓存个数
-	 * expireAfterWrite 写入后过期时间
+	 * 滑动窗口限流器（本地内存实现）
+	 * 相比令牌桶，滑动窗口没有令牌积累效应，空闲后不会"补偿"请求
 	 */
-	private static LoadingCache<String, RateLimiter> limitCaches = CacheBuilder.newBuilder()
-			.maximumSize(1000)
-			.expireAfterWrite(1, TimeUnit.DAYS)
-			.build(new CacheLoader<String, RateLimiter>() {
-				@Override
-				public RateLimiter load(String key) {
-					double perSecond = RateLimitUtil.getCacheKeyPerSecond(key);
-					return RateLimiter.create(perSecond);
-				}
-			});
+	private static final SlidingWindowRateLimiter rateLimiter = new SlidingWindowRateLimiter();
 
 	/**
 	 * 切点
@@ -63,9 +48,11 @@ public class RateLimitAspect {
 		MethodSignature signature = (MethodSignature) point.getSignature();
 		Method method = signature.getMethod();
 		if (method.isAnnotationPresent(RateLimit.class)) {
+			RateLimit rateLimit = method.getAnnotation(RateLimit.class);
 			String cacheKey = RateLimitUtil.generateCacheKey(method, request);
-			RateLimiter limiter = limitCaches.get(cacheKey);
-			if (!limiter.tryAcquire()) {
+			double perSecond = rateLimit.perSecond();
+
+			if (!rateLimiter.tryAcquire(cacheKey, perSecond)) {
 				String pointMethodName = point.getSignature().getName();
 				logger.info("限流{}方法，具体内容【{}】", pointMethodName, cacheKey);
 				if ("toLink".equals(pointMethodName)) {
@@ -73,6 +60,8 @@ public class RateLimitAspect {
 				} else {
 					return Result.fail("你手速太快了");
 				}
+			} else {
+				logger.info("放行{}方法，具体内容【{}】", point.getSignature().getName(), cacheKey);
 			}
 		}
 		return point.proceed();
